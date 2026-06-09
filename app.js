@@ -24,6 +24,7 @@
   const loadExampleBtn = document.getElementById('loadExampleBtn')
   const loadWorkingBtn = document.getElementById('loadWorkingBtn')
   const continueBtn = document.getElementById('continueBtn')
+  const formError = document.getElementById('formError')
 
   const inputs = {
     monthlyIncome: document.getElementById('monthlyIncome'),
@@ -35,7 +36,9 @@
     fixedAsset: document.getElementById('fixedAsset'),
     payable: document.getElementById('payable'),
     loans: document.getElementById('loans'),
-    existingEmi: document.getElementById('existingEmi')
+    existingEmi: document.getElementById('existingEmi'),
+    tenorYears: document.getElementById('tenorYears'),
+    annualRate: document.getElementById('annualRate')
   }
 
   const out = {
@@ -68,7 +71,6 @@
     backBtn.classList.toggle('hidden', step===1)
     if(resetBtn) resetBtn.classList.toggle('hidden', step!==5)
     continueBtn.textContent = step===5 ? 'Calculate Estimate' : 'Continue'
-    if(step===5) computeAndRender()
 
     // show only the example button that matches the selected financing need, and only after leaving step 1
     if(loadExampleBtn) loadExampleBtn.style.display = (state.financingNeed === 'fixed' && step !== 1) ? '' : 'none'
@@ -87,6 +89,8 @@
     state.payable = Number(inputs.payable.value) || 0
     state.loans = Number(inputs.loans.value) || 0
     state.existingEmi = Number(inputs.existingEmi.value) || 0
+    state.tenorYears = Number(inputs.tenorYears && inputs.tenorYears.value) || state.tenorYears || 3
+    state.annualRate = Number(inputs.annualRate && inputs.annualRate.value) || state.annualRate || 16.75
   }
 
   function computeAll(){
@@ -161,6 +165,12 @@
     out.auditDebtBurden.textContent = formatBDT(c.debtBurdenRatioLimit,0)
     out.auditDebtEquity.textContent = formatBDT(c.debtEquityLimit,0)
 
+    // update tenor/rate display
+    const tenorEl = document.getElementById('tenorDisplay')
+    const rateEl = document.getElementById('rateDisplay')
+    if(tenorEl) tenorEl.textContent = state.tenorYears
+    if(rateEl) rateEl.textContent = Number(state.annualRate).toFixed(2)
+
     // generate user-facing feedback messages based on computed values
     const messages = []
     if(c.netIncome <= 0) messages.push('Net income is non-positive — business may not be cashflow-positive for loan servicing.')
@@ -217,6 +227,8 @@
     inputs.payable.value = ''
     inputs.loans.value = ''
     inputs.existingEmi.value = ''
+    if(inputs.tenorYears) inputs.tenorYears.value = ''
+    if(inputs.annualRate) inputs.annualRate.value = ''
   }
 
   // radio card clicks
@@ -226,21 +238,21 @@
       state.financingNeed = val
       document.querySelectorAll('[data-value]').forEach(card=>card.classList.remove('ring-2','ring-rose-400'))
       el.classList.add('ring-2','ring-rose-400')
+      clearFormError()
     })
   })
 
   // navigation handlers
   continueBtn.addEventListener('click', ()=>{
+    clearFormError()
     if(state.step < 5){
-      // simple validation for each step
-      if(state.step === 1){
-        // ensure financingNeed set
-        // selection ensured by default
-      }
+      const v = validateStep(state.step)
+      if(!v.ok){ showFormError(v.messages); return }
       state.step += 1
       showStep(state.step)
     } else {
-      // on final step, calculate and show result (already computed in showStep)
+      const v = validateStep(5)
+      if(!v.ok){ showFormError(v.messages); return }
       computeAndRender()
     }
   })
@@ -298,26 +310,24 @@
       tenorYears: 3,
       annualRate: 16.75
     }
-    // populate inputs
-    inputs.monthlyIncome.value = sample.monthlyIncome
-    inputs.monthlyExpense.value = sample.monthlyExpense
-    inputs.personalExpense.value = sample.personalExpense
-    inputs.cash.value = sample.cash
-    inputs.stock.value = sample.stock
-    inputs.receivable.value = sample.receivable
-    inputs.fixedAsset.value = sample.fixedAsset
-    inputs.payable.value = sample.payable
-    inputs.loans.value = sample.loans
-    inputs.existingEmi.value = sample.existingEmi
-    state.tenorYears = sample.tenorYears
-    state.annualRate = sample.annualRate
-    // set financing need and visual selection
+    // set financing need visually
     state.financingNeed = sample.financingNeed
     document.querySelectorAll('[data-value]').forEach(card=>card.classList.remove('ring-2','ring-rose-400'))
     const el = document.querySelector('[data-value="'+sample.financingNeed+'"]')
     if(el) el.classList.add('ring-2','ring-rose-400')
-    // go to result step and compute
-    showStep(5)
+
+    // populate only fields for the current step so user advances step-by-step
+    if(state.step === 1){
+      // just set card selection
+      clearFormError()
+      return
+    }
+    if(state.step === 2){ inputs.monthlyIncome.value = sample.monthlyIncome; inputs.monthlyExpense.value = sample.monthlyExpense; inputs.personalExpense.value = sample.personalExpense }
+    if(state.step === 3){ inputs.cash.value = sample.cash; inputs.stock.value = sample.stock; inputs.receivable.value = sample.receivable; inputs.fixedAsset.value = sample.fixedAsset }
+    if(state.step === 4){ inputs.payable.value = sample.payable; inputs.loans.value = sample.loans; inputs.existingEmi.value = sample.existingEmi }
+    if(state.step === 5){ if(inputs.tenorYears) inputs.tenorYears.value = sample.tenorYears; if(inputs.annualRate) inputs.annualRate.value = sample.annualRate }
+    syncInputsToState()
+    clearFormError()
   }
 
   if(loadExampleBtn) loadExampleBtn.addEventListener('click', loadExample)
@@ -338,23 +348,19 @@
       tenorYears: 3,
       annualRate: 16.75
     }
-    inputs.monthlyIncome.value = sample.monthlyIncome
-    inputs.monthlyExpense.value = sample.monthlyExpense
-    inputs.personalExpense.value = sample.personalExpense
-    inputs.cash.value = sample.cash
-    inputs.stock.value = sample.stock
-    inputs.receivable.value = sample.receivable
-    inputs.fixedAsset.value = sample.fixedAsset
-    inputs.payable.value = sample.payable
-    inputs.loans.value = sample.loans
-    inputs.existingEmi.value = sample.existingEmi
-    state.tenorYears = sample.tenorYears
-    state.annualRate = sample.annualRate
+    // set financing need visually
     state.financingNeed = sample.financingNeed
     document.querySelectorAll('[data-value]').forEach(card=>card.classList.remove('ring-2','ring-rose-400'))
     const el = document.querySelector('[data-value="'+sample.financingNeed+'"]')
     if(el) el.classList.add('ring-2','ring-rose-400')
-    showStep(5)
+    // populate only fields for the current step
+    if(state.step === 1){ clearFormError(); return }
+    if(state.step === 2){ inputs.monthlyIncome.value = sample.monthlyIncome; inputs.monthlyExpense.value = sample.monthlyExpense; inputs.personalExpense.value = sample.personalExpense }
+    if(state.step === 3){ inputs.cash.value = sample.cash; inputs.stock.value = sample.stock; inputs.receivable.value = sample.receivable; inputs.fixedAsset.value = sample.fixedAsset }
+    if(state.step === 4){ inputs.payable.value = sample.payable; inputs.loans.value = sample.loans; inputs.existingEmi.value = sample.existingEmi }
+    if(state.step === 5){ if(inputs.tenorYears) inputs.tenorYears.value = sample.tenorYears; if(inputs.annualRate) inputs.annualRate.value = sample.annualRate }
+    syncInputsToState()
+    clearFormError()
   }
 
   if(loadWorkingBtn) loadWorkingBtn.addEventListener('click', loadWorkingExample)
@@ -365,8 +371,54 @@
       syncInputsToState()
       // if on result step, update live
       if(state.step === 5) computeAndRender()
+      clearFormError()
     })
   })
+
+  function showFormError(messages){
+    if(!formError) return
+    if(typeof messages === 'string') messages = [messages]
+    formError.innerHTML = messages.map(m=>`<div>• ${m}</div>`).join('')
+    formError.classList.remove('hidden')
+    formError.classList.add('bg-red-50','border','border-red-200','p-3','rounded-lg','text-red-700')
+  }
+
+  function clearFormError(){
+    if(!formError) return
+    formError.innerHTML = ''
+    formError.classList.add('hidden')
+    formError.classList.remove('bg-red-50','border','border-red-200','p-3','rounded-lg','text-red-700')
+  }
+
+  function validateStep(step){
+    const missing = []
+    const labels = {
+      financingNeed: 'Financing Need',
+      monthlyIncome: 'Monthly Income',
+      monthlyExpense: 'Monthly Business Expense',
+      personalExpense: 'Personal & Family Expense',
+      cash: 'Cash',
+      stock: 'Stock',
+      receivable: 'Receivable',
+      fixedAsset: 'Fixed Asset',
+      payable: 'Payable',
+      loans: 'Loans & Debts',
+      existingEmi: 'Existing EMI',
+      tenorYears: 'Tenor (Years)',
+      annualRate: 'Interest Rate'
+    }
+    function isEmpty(id){
+      const el = inputs[id]
+      return !el || el.value === '' || el.value === null
+    }
+    if(step === 1){ if(!state.financingNeed) missing.push(labels.financingNeed) }
+    if(step === 2){ ['monthlyIncome','monthlyExpense','personalExpense'].forEach(k=>{ if(isEmpty(k)) missing.push(labels[k]) }) }
+    if(step === 3){ ['cash','stock','receivable','fixedAsset'].forEach(k=>{ if(isEmpty(k)) missing.push(labels[k]) }) }
+    if(step === 4){ ['payable','loans','existingEmi'].forEach(k=>{ if(isEmpty(k)) missing.push(labels[k]) }) }
+    if(step === 5){ if(!state.financingNeed) missing.push(labels.financingNeed); Object.keys(labels).forEach(k=>{ if(k!=='financingNeed' && isEmpty(k)) missing.push(labels[k]) }) }
+    if(missing.length) return {ok:false, messages: ['Please fill these fields: '+ missing.join(', ')]}
+    return {ok:true}
+  }
 
   // wiring initial state
   initInputs()

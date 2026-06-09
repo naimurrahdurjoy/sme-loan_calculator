@@ -37,7 +37,7 @@
 
           <!-- Step 1: Financing Need -->
           <section data-step="1" class="step-panel absolute inset-0 flex flex-col items-center justify-center">
-            <h2 class="text-xl font-semibold text-slate-800 mb-4">What type of financing do you need?</h2>
+            <h2 class="text-xl font-semibold text-slate-800 mb-4">What type of financing do you need? <span class="text-red-500">*</span></h2>
             <div class="flex gap-4 w-full max-w-2xl px-6">
               <label class="flex-1 cursor-pointer">
                 <input type="radio" name="need" value="working" class="hidden" />
@@ -67,15 +67,15 @@
             <h2 class="text-xl font-semibold text-slate-800 mb-4">Income & cashflow</h2>
             <form class="w-full max-w-2xl px-6 grid gap-4">
               <label class="flex flex-col">
-                <span class="text-sm text-slate-600">Monthly Income</span>
+                <span class="text-sm text-slate-600">Monthly Income <span class="text-red-500">*</span></span>
                 <input id="monthlyIncome" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
               <label class="flex flex-col">
-                <span class="text-sm text-slate-600">Monthly Business Expense</span>
+                <span class="text-sm text-slate-600">Monthly Business Expense <span class="text-red-500">*</span></span>
                 <input id="monthlyExpense" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
               <label class="flex flex-col">
-                <span class="text-sm text-slate-600">Personal & Family Expense</span>
+                <span class="text-sm text-slate-600">Personal & Family Expense <span class="text-red-500">*</span></span>
                 <input id="personalExpense" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
             </form>
@@ -86,19 +86,19 @@
             <h2 class="text-xl font-semibold text-slate-800 mb-4">Business Assets</h2>
             <form class="w-full max-w-2xl px-6 grid gap-4 md:grid-cols-2">
               <label class="flex flex-col">
-                <span class="text-sm text-slate-600">Cash</span>
+                <span class="text-sm text-slate-600">Cash <span class="text-red-500">*</span></span>
                 <input id="cash" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
               <label class="flex flex-col">
-                <span class="text-sm text-slate-600">Stock</span>
+                <span class="text-sm text-slate-600">Stock <span class="text-red-500">*</span></span>
                 <input id="stock" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
               <label class="flex flex-col">
-                <span class="text-sm text-slate-600">Receivable</span>
+                <span class="text-sm text-slate-600">Receivable <span class="text-red-500">*</span></span>
                 <input id="receivable" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
               <label class="flex flex-col">
-                <span class="text-sm text-slate-600">Fixed Asset</span>
+                <span class="text-sm text-slate-600">Fixed Asset <span class="text-red-500">*</span></span>
                 <input id="fixedAsset" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
             </form>
@@ -109,15 +109,15 @@
             <h2 class="text-xl font-semibold text-slate-800 mb-4">Liabilities & commitments</h2>
             <form class="w-full max-w-2xl px-6 grid gap-4 md:grid-cols-2">
               <label class="flex flex-col">
-                <span class="text-sm text-slate-600">Payable</span>
+                <span class="text-sm text-slate-600">Payable <span class="text-red-500">*</span></span>
                 <input id="payable" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
               <label class="flex flex-col">
-                <span class="text-sm text-slate-600">Loans & Debts</span>
+                <span class="text-sm text-slate-600">Loans & Debts <span class="text-red-500">*</span></span>
                 <input id="loans" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
               <label class="flex flex-col md:col-span-2">
-                <span class="text-sm text-slate-600">Existing EMI</span>
+                <span class="text-sm text-slate-600">Existing EMI <span class="text-red-500">*</span></span>
                 <input id="existingEmi" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
               </label>
             </form>
@@ -127,6 +127,16 @@
           <section data-step="5" class="step-panel absolute inset-0 hidden flex-col items-center justify-center">
             <h2 class="text-xl font-semibold text-slate-800 mb-4">Estimate Result</h2>
             <div class="w-full max-w-2xl px-6">
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <label class="flex flex-col">
+                  <span class="text-sm text-slate-600">Tenor (Years) <span class="text-red-500">*</span></span>
+                  <input id="tenorYears" type="number" min="1" step="1" class="mt-2 p-3 rounded-lg border border-slate-200" />
+                </label>
+                <label class="flex flex-col">
+                    <span class="text-sm text-slate-600">Interest Rate (Annual %) <span class="text-red-500">*</span></span>
+                  <input id="annualRate" type="number" min="0" step="0.01" class="mt-2 p-3 rounded-lg border border-slate-200" />
+                </label>
+              </div>
               <div id="resultCard" class="rounded-2xl p-6 bg-gradient-to-br from-slate-900 to-slate-700 text-white">
                 <div class="flex items-center justify-between">
                   <div>
@@ -136,7 +146,7 @@
                   <div class="text-right">
                     <div class="text-sm text-rose-200">Monthly EMI</div>
                     <div id="monthlyEmi" class="text-2xl font-semibold mt-2">BDT 0</div>
-                    <div class="text-xs mt-1">Tenor: 3 years • Rate: 16.75%</div>
+                    <div class="text-xs mt-1">Tenor: <span id="tenorDisplay">3</span> years • Rate: <span id="rateDisplay">16.75</span>%</div>
                   </div>
                 </div>
                 <div class="mt-4">
@@ -154,6 +164,7 @@
                   </details>
                 </div>
               </div>
+              <div id="formError" class="max-w-3xl w-full mx-auto mt-3 text-sm text-red-400 hidden"></div>
             </div>
           </section>
         </div>

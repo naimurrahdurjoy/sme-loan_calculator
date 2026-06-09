@@ -1,0 +1,19 @@
+node_modules/
+.env
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+coverage/
+.idea/
+.vscode/
+*.log
+Thumbs.db
+
+# OS specific
+Thumbs.db
+Desktop.ini
+
+# OneDrive temp
+~$*

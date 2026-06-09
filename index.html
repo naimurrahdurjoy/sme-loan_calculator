@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SME Shohoj Hishab Loan Estimation — CRAB Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root{--rose:#8b0f20}
+      .card-shadow{box-shadow:0 6px 20px rgba(15,23,42,0.12)}
+      .step-enter{transform:translateX(20px);opacity:0}
+      .step-enter-active{transform:none;opacity:1;transition:all .36s cubic-bezier(.2,.9,.3,1)}
+      .step-exit{transform:none;opacity:1}
+      .step-exit-active{transform:translateX(-20px);opacity:0;transition:all .24s ease}
+    </style>
+  </head>
+  <body class="bg-slate-50 min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-3xl w-full bg-white rounded-2xl p-6 md:p-10 card-shadow">
+      <header class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-slate-800 to-slate-600 flex items-center justify-center text-white font-bold">CRAB</div>
+          <div>
+            <h1 class="text-slate-900 font-semibold text-lg">SME Shohoj Hishab</h1>
+            <p class="text-sm text-slate-500">Loan Estimation</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm text-rose-700 font-semibold">CRAB Bank</div>
+          <div class="text-xs text-slate-400">Trusted SME Financing</div>
+        </div>
+      </header>
+              <button id="resetBtn" class="px-5 py-2 rounded-lg bg-white text-rose-600 border border-rose-200 hidden">Start Over</button>
+
+      <main>
+        <div id="wizard" class="relative overflow-hidden h-80 md:h-96">
+          <!-- Steps container: we'll position steps absolute and translate -->
+
+          <!-- Step 1: Financing Need -->
+          <section data-step="1" class="step-panel absolute inset-0 flex flex-col items-center justify-center">
+            <h2 class="text-xl font-semibold text-slate-800 mb-4">What type of financing do you need?</h2>
+            <div class="flex gap-4 w-full max-w-2xl px-6">
+              <label class="flex-1 cursor-pointer">
+                <input type="radio" name="need" value="working" class="hidden" />
+                <div data-value="working" class="p-6 rounded-xl border-2 border-slate-200 bg-white hover:border-rose-200 transition flex flex-col gap-3 items-start">
+                  <div class="flex items-center gap-3">
+                    <svg class="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M12 3v18"/></svg>
+                    <div class="text-lg font-medium">Working Capital</div>
+                  </div>
+                  <p class="text-sm text-slate-500">Short-term funds for daily operations and stock financing.</p>
+                </div>
+              </label>
+              <label class="flex-1 cursor-pointer">
+                <input type="radio" name="need" value="fixed" class="hidden" />
+                <div data-value="fixed" class="p-6 rounded-xl border-2 border-slate-200 bg-white hover:border-rose-200 transition flex flex-col gap-3 items-start">
+                  <div class="flex items-center gap-3">
+                    <svg class="w-8 h-8 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7h18v11H3zM7 7V4h10v3"/></svg>
+                    <div class="text-lg font-medium">Fixed Asset</div>
+                  </div>
+                  <p class="text-sm text-slate-500">Finance for machinery, equipment, or long-term investments.</p>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <!-- Step 2: Income & Cashflow -->
+          <section data-step="2" class="step-panel absolute inset-0 hidden flex-col items-center justify-center">
+            <h2 class="text-xl font-semibold text-slate-800 mb-4">Income & cashflow</h2>
+            <form class="w-full max-w-2xl px-6 grid gap-4">
+              <label class="flex flex-col">
+                <span class="text-sm text-slate-600">Monthly Income</span>
+                <input id="monthlyIncome" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+              <label class="flex flex-col">
+                <span class="text-sm text-slate-600">Monthly Business Expense</span>
+                <input id="monthlyExpense" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+              <label class="flex flex-col">
+                <span class="text-sm text-slate-600">Personal & Family Expense</span>
+                <input id="personalExpense" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+            </form>
+          </section>
+
+          <!-- Step 3: Business Assets -->
+          <section data-step="3" class="step-panel absolute inset-0 hidden flex-col items-center justify-center">
+            <h2 class="text-xl font-semibold text-slate-800 mb-4">Business Assets</h2>
+            <form class="w-full max-w-2xl px-6 grid gap-4 md:grid-cols-2">
+              <label class="flex flex-col">
+                <span class="text-sm text-slate-600">Cash</span>
+                <input id="cash" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+              <label class="flex flex-col">
+                <span class="text-sm text-slate-600">Stock</span>
+                <input id="stock" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+              <label class="flex flex-col">
+                <span class="text-sm text-slate-600">Receivable</span>
+                <input id="receivable" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+              <label class="flex flex-col">
+                <span class="text-sm text-slate-600">Fixed Asset</span>
+                <input id="fixedAsset" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+            </form>
+          </section>
+
+          <!-- Step 4: Liabilities -->
+          <section data-step="4" class="step-panel absolute inset-0 hidden flex-col items-center justify-center">
+            <h2 class="text-xl font-semibold text-slate-800 mb-4">Liabilities & commitments</h2>
+            <form class="w-full max-w-2xl px-6 grid gap-4 md:grid-cols-2">
+              <label class="flex flex-col">
+                <span class="text-sm text-slate-600">Payable</span>
+                <input id="payable" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+              <label class="flex flex-col">
+                <span class="text-sm text-slate-600">Loans & Debts</span>
+                <input id="loans" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+              <label class="flex flex-col md:col-span-2">
+                <span class="text-sm text-slate-600">Existing EMI</span>
+                <input id="existingEmi" type="number" min="0" class="mt-2 p-3 rounded-lg border border-slate-200" />
+              </label>
+            </form>
+          </section>
+
+          <!-- Step 5: Result -->
+          <section data-step="5" class="step-panel absolute inset-0 hidden flex-col items-center justify-center">
+            <h2 class="text-xl font-semibold text-slate-800 mb-4">Estimate Result</h2>
+            <div class="w-full max-w-2xl px-6">
+              <div id="resultCard" class="rounded-2xl p-6 bg-gradient-to-br from-slate-900 to-slate-700 text-white">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm text-rose-200">Eligible Loan Amount</div>
+                    <div id="eligibleAmount" class="text-3xl font-bold mt-2">BDT 0</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-sm text-rose-200">Monthly EMI</div>
+                    <div id="monthlyEmi" class="text-2xl font-semibold mt-2">BDT 0</div>
+                    <div class="text-xs mt-1">Tenor: 3 years • Rate: 16.75%</div>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <details class="bg-white/10 p-3 rounded-lg">
+                    <summary class="cursor-pointer text-sm text-rose-100">Audit & calculations</summary>
+                    <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-rose-50">
+                      <div>Net Income: <span id="auditNetIncome" class="font-medium"></span></div>
+                      <div>Total Assets: <span id="auditTotalAssets" class="font-medium"></span></div>
+                      <div>Total Liabilities: <span id="auditTotalLiabilities" class="font-medium"></span></div>
+                      <div>Inventory Cap: <span id="auditInventoryCap" class="font-medium"></span></div>
+                      <div>Net Liquid Asset Limit: <span id="auditNetLiquid" class="font-medium"></span></div>
+                      <div>Debt Burden Ratio Limit: <span id="auditDebtBurden" class="font-medium"></span></div>
+                      <div>Debt Equity Ratio Limit: <span id="auditDebtEquity" class="font-medium"></span></div>
+                    </div>
+                  </details>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-6 flex items-center justify-between">
+          <button id="backBtn" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 bg-white hidden">Back</button>
+          <div class="flex gap-3">
+            <button id="continueBtn" class="px-5 py-2 rounded-lg bg-rose-600 text-white shadow hover:opacity-95">Continue</button>
+            <button id="loadExampleBtn" class="px-5 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">Load Example (Fixed)</button>
+            <button id="loadWorkingBtn" class="px-5 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">Load Example (Working)</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+    <div id="creditBar" class="fixed bottom-0 left-0 w-full bg-slate-900 text-slate-200 text-center py-2 text-sm">
+      © 2026 Copyright Md. Naimur Rahman — Compass Intern, Market Intelligence and Transformation
+  </body>
+</html>

@@ -29,6 +29,12 @@
           <div class="text-xs text-slate-400">Trusted SME Financing</div>
         </div>
       </header>
+      <div class="w-full mb-4">
+        <div class="text-sm text-slate-600 mb-1">Progress: <span id="progressPercent">0%</span></div>
+        <div class="w-full bg-slate-200 h-2 rounded">
+          <div id="progressBarFill" class="h-2 bg-rose-600 rounded" style="width:0%"></div>
+        </div>
+      </div>
               <button id="resetBtn" class="px-5 py-2 rounded-lg bg-white text-rose-600 border border-rose-200 hidden">Start Over</button>
 
       <main>
@@ -174,8 +180,7 @@
           <button id="backBtn" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 bg-white hidden">Back</button>
           <div class="flex gap-3">
             <button id="continueBtn" class="px-5 py-2 rounded-lg bg-rose-600 text-white shadow hover:opacity-95">Continue</button>
-            <button id="loadExampleBtn" class="px-5 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">Load Example (Fixed)</button>
-            <button id="loadWorkingBtn" class="px-5 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">Load Example (Working)</button>
+            <!-- Load Example buttons removed to encourage step-by-step input -->
           </div>
         </div>
       </main>

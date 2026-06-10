@@ -2,7 +2,89 @@
 (function(){
   const state = {
     step: 1,
-    // load example functions removed; examples are intentionally disabled
+    financingNeed: null,
+    monthlyIncome: 0,
+    monthlyExpense: 0,
+    personalExpense: 0,
+    cash: 0,
+    stock: 0,
+    receivable: 0,
+    fixedAsset: 0,
+    payable: 0,
+    loans: 0,
+    existingEmi: 0,
+    tenorYears: 3,
+    annualRate: 16.75
+  }
+
+  // DOM refs
+  const panels = document.querySelectorAll('.step-panel')
+  const backBtn = document.getElementById('backBtn')
+  const resetBtn = document.getElementById('resetBtn')
+  const loadExampleBtn = document.getElementById('loadExampleBtn')
+  const loadWorkingBtn = document.getElementById('loadWorkingBtn')
+  const continueBtn = document.getElementById('continueBtn')
+  const formError = document.getElementById('formError')
+
+  const inputs = {
+    monthlyIncome: document.getElementById('monthlyIncome'),
+    monthlyExpense: document.getElementById('monthlyExpense'),
+    personalExpense: document.getElementById('personalExpense'),
+    cash: document.getElementById('cash'),
+    stock: document.getElementById('stock'),
+    receivable: document.getElementById('receivable'),
+    fixedAsset: document.getElementById('fixedAsset'),
+    payable: document.getElementById('payable'),
+    loans: document.getElementById('loans'),
+    existingEmi: document.getElementById('existingEmi'),
+    tenorYears: document.getElementById('tenorYears'),
+    annualRate: document.getElementById('annualRate')
+  }
+
+  const out = {
+    eligibleAmount: document.getElementById('eligibleAmount'),
+    monthlyEmi: document.getElementById('monthlyEmi'),
+    auditNetIncome: document.getElementById('auditNetIncome'),
+    auditTotalAssets: document.getElementById('auditTotalAssets'),
+    auditTotalLiabilities: document.getElementById('auditTotalLiabilities'),
+    auditInventoryCap: document.getElementById('auditInventoryCap'),
+    auditNetLiquid: document.getElementById('auditNetLiquid'),
+    auditDebtBurden: document.getElementById('auditDebtBurden'),
+    auditDebtEquity: document.getElementById('auditDebtEquity'),
+    feedback: document.getElementById('feedback')
+  }
+
+  function formatBDT(n, decimals=2){
+    const v = Number(n) || 0
+    return 'BDT ' + v.toLocaleString(undefined, {minimumFractionDigits:decimals, maximumFractionDigits:decimals})
+  }
+
+  function showStep(step){
+    state.step = step
+    panels.forEach(p=>{
+      if(Number(p.dataset.step)===step){
+        p.classList.remove('hidden')
+      } else {
+        p.classList.add('hidden')
+      }
+    })
+    backBtn.classList.toggle('hidden', step===1)
+    if(resetBtn) resetBtn.classList.toggle('hidden', step!==5)
+    continueBtn.textContent = step===5 ? 'Calculate Estimate' : 'Continue'
+
+    // show only the example button that matches the selected financing need, and only after leaving step 1
+    if(loadExampleBtn) loadExampleBtn.style.display = (state.financingNeed === 'fixed' && step !== 1) ? '' : 'none'
+    if(loadWorkingBtn) loadWorkingBtn.style.display = (state.financingNeed === 'working' && step !== 1) ? '' : 'none'
+
+  }
+
+  function syncInputsToState(){
+    state.monthlyIncome = Number(inputs.monthlyIncome.value) || 0
+    state.monthlyExpense = Number(inputs.monthlyExpense.value) || 0
+    state.personalExpense = Number(inputs.personalExpense.value) || 0
+    state.cash = Number(inputs.cash.value) || 0
+    state.stock = Number(inputs.stock.value) || 0
+    state.receivable = Number(inputs.receivable.value) || 0
     state.fixedAsset = Number(inputs.fixedAsset.value) || 0
     state.payable = Number(inputs.payable.value) || 0
     state.loans = Number(inputs.loans.value) || 0
@@ -168,7 +250,6 @@
       if(!v.ok){ showFormError(v.messages); return }
       state.step += 1
       showStep(state.step)
-      updateProgressAndMotivation(state.step)
     } else {
       const v = validateStep(5)
       if(!v.ok){ showFormError(v.messages); return }
@@ -180,7 +261,6 @@
     if(state.step > 1){
       state.step -= 1
       showStep(state.step)
-      updateProgressAndMotivation(state.step)
     }
   })
 
@@ -206,7 +286,6 @@
     if(f && f.parentNode) f.parentNode.removeChild(f)
     out.feedback = null
     showStep(1)
-    updateProgressAndMotivation(1)
     // focus first input for convenience
     const firstInp = document.getElementById('monthlyIncome')
     if(firstInp) firstInp.focus()
@@ -214,28 +293,77 @@
 
   if(resetBtn) resetBtn.addEventListener('click', resetForm)
 
-  function updateProgressAndMotivation(step){
-    try{
-      const pct = Math.round((step / 5) * 100)
-      const pctEl = document.getElementById('progressPercent')
-      const fill = document.getElementById('progressBarFill')
-      const mot = document.getElementById('motivational')
-      if(pctEl) pctEl.textContent = pct + '%'
-      if(fill) fill.style.width = pct + '%'
-      if(mot){
-        const msgs = {
-          1: 'You\'re off to a great start — choose the financing you need.',
-          2: 'Nice! Tell us about your monthly income to estimate affordability.',
-          3: 'Good progress — provide your business assets to help improve eligibility.',
-          4: 'Almost there — add liabilities so we can finalize the assessment.',
-          5: 'Final step — review and calculate your eligible loan amount.'
-        }
-        mot.textContent = msgs[step] || ''
-      }
-    }catch(e){/* ignore */}
+  // load example data into the form
+  function loadExample(){
+    const sample = {
+      financingNeed: 'fixed',
+      monthlyIncome: 548333,
+      monthlyExpense: 421000,
+      personalExpense: 20000,
+      cash: 200000,
+      stock: 1700000,
+      receivable: 700000,
+      fixedAsset: 3700000,
+      payable: 400000,
+      loans: 1300000,
+      existingEmi: 0,
+      tenorYears: 3,
+      annualRate: 16.75
+    }
+    // set financing need visually
+    state.financingNeed = sample.financingNeed
+    document.querySelectorAll('[data-value]').forEach(card=>card.classList.remove('ring-2','ring-rose-400'))
+    const el = document.querySelector('[data-value="'+sample.financingNeed+'"]')
+    if(el) el.classList.add('ring-2','ring-rose-400')
+
+    // populate only fields for the current step so user advances step-by-step
+    if(state.step === 1){
+      // just set card selection
+      clearFormError()
+      return
+    }
+    if(state.step === 2){ inputs.monthlyIncome.value = sample.monthlyIncome; inputs.monthlyExpense.value = sample.monthlyExpense; inputs.personalExpense.value = sample.personalExpense }
+    if(state.step === 3){ inputs.cash.value = sample.cash; inputs.stock.value = sample.stock; inputs.receivable.value = sample.receivable; inputs.fixedAsset.value = sample.fixedAsset }
+    if(state.step === 4){ inputs.payable.value = sample.payable; inputs.loans.value = sample.loans; inputs.existingEmi.value = sample.existingEmi }
+    if(state.step === 5){ if(inputs.tenorYears) inputs.tenorYears.value = sample.tenorYears; if(inputs.annualRate) inputs.annualRate.value = sample.annualRate }
+    syncInputsToState()
+    clearFormError()
   }
 
-  // Example loaders removed to encourage manual step-by-step input
+  if(loadExampleBtn) loadExampleBtn.addEventListener('click', loadExample)
+  // load working-capital example
+  function loadWorkingExample(){
+    const sample = {
+      financingNeed: 'working',
+      monthlyIncome: 548333,
+      monthlyExpense: 421000,
+      personalExpense: 20000,
+      cash: 200000,
+      stock: 1700000,
+      receivable: 700000,
+      fixedAsset: 3700000,
+      payable: 400000,
+      loans: 1300000,
+      existingEmi: 0,
+      tenorYears: 3,
+      annualRate: 16.75
+    }
+    // set financing need visually
+    state.financingNeed = sample.financingNeed
+    document.querySelectorAll('[data-value]').forEach(card=>card.classList.remove('ring-2','ring-rose-400'))
+    const el = document.querySelector('[data-value="'+sample.financingNeed+'"]')
+    if(el) el.classList.add('ring-2','ring-rose-400')
+    // populate only fields for the current step
+    if(state.step === 1){ clearFormError(); return }
+    if(state.step === 2){ inputs.monthlyIncome.value = sample.monthlyIncome; inputs.monthlyExpense.value = sample.monthlyExpense; inputs.personalExpense.value = sample.personalExpense }
+    if(state.step === 3){ inputs.cash.value = sample.cash; inputs.stock.value = sample.stock; inputs.receivable.value = sample.receivable; inputs.fixedAsset.value = sample.fixedAsset }
+    if(state.step === 4){ inputs.payable.value = sample.payable; inputs.loans.value = sample.loans; inputs.existingEmi.value = sample.existingEmi }
+    if(state.step === 5){ if(inputs.tenorYears) inputs.tenorYears.value = sample.tenorYears; if(inputs.annualRate) inputs.annualRate.value = sample.annualRate }
+    syncInputsToState()
+    clearFormError()
+  }
+
+  if(loadWorkingBtn) loadWorkingBtn.addEventListener('click', loadWorkingExample)
 
   // update reactively on input changes
   Object.values(inputs).forEach(inp=>{
@@ -296,7 +424,6 @@
   initInputs()
   // do not preselect any financing need; user will choose
   showStep(1)
-  updateProgressAndMotivation(1)
 
   // small accessibility: allow Enter to continue
   document.addEventListener('keydown', (e)=>{

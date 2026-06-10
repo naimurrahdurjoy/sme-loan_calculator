@@ -71,11 +71,33 @@
     backBtn.classList.toggle('hidden', step===1)
     if(resetBtn) resetBtn.classList.toggle('hidden', step!==5)
     continueBtn.textContent = step===5 ? 'Calculate Estimate' : 'Continue'
-
     // show only the example button that matches the selected financing need, and only after leaving step 1
     if(loadExampleBtn) loadExampleBtn.style.display = (state.financingNeed === 'fixed' && step !== 1) ? '' : 'none'
     if(loadWorkingBtn) loadWorkingBtn.style.display = (state.financingNeed === 'working' && step !== 1) ? '' : 'none'
 
+    // update progress and motivational text
+    updateProgressAndMotivation(step)
+  }
+
+  function updateProgressAndMotivation(step){
+    try{
+      const pct = Math.round((step / 5) * 100)
+      const progressPercent = document.getElementById('progressPercent')
+      const progressBarFill = document.getElementById('progressBarFill')
+      const motivationalEl = document.getElementById('motivational')
+      if(progressPercent) progressPercent.textContent = pct + '%'
+      if(progressBarFill) progressBarFill.style.width = pct + '%'
+      if(motivationalEl){
+        const msgs = {
+          1: "You're off to a great start — choose the financing you need.",
+          2: 'Nice — tell us about monthly income to estimate affordability.',
+          3: 'Good progress — add your business assets to increase eligibility.',
+          4: 'Almost there — include liabilities so we can finalise the assessment.',
+          5: 'Final step — review and calculate your eligible loan amount.'
+        }
+        motivationalEl.textContent = msgs[step] || ''
+      }
+    }catch(e){/* ignore */}
   }
 
   function syncInputsToState(){

@@ -272,6 +272,8 @@
       if(!v.ok){ showFormError(v.messages); return }
       state.step += 1
       showStep(state.step)
+      // ensure progress updates when user advances
+      if(typeof updateProgressAndMotivation === 'function') updateProgressAndMotivation(state.step)
     } else {
       const v = validateStep(5)
       if(!v.ok){ showFormError(v.messages); return }
@@ -283,6 +285,8 @@
     if(state.step > 1){
       state.step -= 1
       showStep(state.step)
+      // update progress when going back
+      if(typeof updateProgressAndMotivation === 'function') updateProgressAndMotivation(state.step)
     }
   })
 
@@ -446,6 +450,7 @@
   initInputs()
   // do not preselect any financing need; user will choose
   showStep(1)
+  if(typeof updateProgressAndMotivation === 'function') updateProgressAndMotivation(1)
 
   // small accessibility: allow Enter to continue
   document.addEventListener('keydown', (e)=>{

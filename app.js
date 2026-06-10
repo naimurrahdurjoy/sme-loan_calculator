@@ -267,16 +267,17 @@
   // navigation handlers
   continueBtn.addEventListener('click', ()=>{
     clearFormError()
+    clearFieldErrors()
     if(state.step < 5){
       const v = validateStep(state.step)
-      if(!v.ok){ showFormError(v.messages); return }
+      if(!v.ok){ showFormError(v.messages); showFieldErrors(v.missingIds); return }
       state.step += 1
       showStep(state.step)
       // ensure progress updates when user advances
       if(typeof updateProgressAndMotivation === 'function') updateProgressAndMotivation(state.step)
     } else {
       const v = validateStep(5)
-      if(!v.ok){ showFormError(v.messages); return }
+      if(!v.ok){ showFormError(v.messages); showFieldErrors(v.missingIds); return }
       computeAndRender()
     }
   })
@@ -398,6 +399,7 @@
       // if on result step, update live
       if(state.step === 5) computeAndRender()
       clearFormError()
+      clearFieldErrors()
     })
   })
 
@@ -418,6 +420,7 @@
 
   function validateStep(step){
     const missing = []
+    const missingIds = []
     const labels = {
       financingNeed: 'Financing Need',
       monthlyIncome: 'Monthly Income',
@@ -437,13 +440,56 @@
       const el = inputs[id]
       return !el || el.value === '' || el.value === null
     }
-    if(step === 1){ if(!state.financingNeed) missing.push(labels.financingNeed) }
-    if(step === 2){ ['monthlyIncome','monthlyExpense','personalExpense'].forEach(k=>{ if(isEmpty(k)) missing.push(labels[k]) }) }
-    if(step === 3){ ['cash','stock','receivable','fixedAsset'].forEach(k=>{ if(isEmpty(k)) missing.push(labels[k]) }) }
-    if(step === 4){ ['payable','loans','existingEmi'].forEach(k=>{ if(isEmpty(k)) missing.push(labels[k]) }) }
-    if(step === 5){ if(!state.financingNeed) missing.push(labels.financingNeed); Object.keys(labels).forEach(k=>{ if(k!=='financingNeed' && isEmpty(k)) missing.push(labels[k]) }) }
-    if(missing.length) return {ok:false, messages: ['Please fill these fields: '+ missing.join(', ')]}
+    if(step === 1){ if(!state.financingNeed){ missing.push(labels.financingNeed); missingIds.push('financingNeed') } }
+    if(step === 2){ ['monthlyIncome','monthlyExpense','personalExpense'].forEach(k=>{ if(isEmpty(k)){ missing.push(labels[k]); missingIds.push(k) } }) }
+    if(step === 3){ ['cash','stock','receivable','fixedAsset'].forEach(k=>{ if(isEmpty(k)){ missing.push(labels[k]); missingIds.push(k) } }) }
+    if(step === 4){ ['payable','loans','existingEmi'].forEach(k=>{ if(isEmpty(k)){ missing.push(labels[k]); missingIds.push(k) } }) }
+    if(step === 5){ if(!state.financingNeed){ missing.push(labels.financingNeed); missingIds.push('financingNeed') }; Object.keys(labels).forEach(k=>{ if(k!=='financingNeed' && isEmpty(k)){ missing.push(labels[k]); missingIds.push(k) } }) }
+    if(missing.length) return {ok:false, messages: ['Please fill these fields: '+ missing.join(', ')], missingIds}
     return {ok:true}
+  }
+
+  function clearFieldErrors(){
+    try{
+      Object.keys(inputs).forEach(id=>{
+        const el = inputs[id]
+        if(!el) return
+        el.classList.remove('border-red-400','ring-1','ring-red-300')
+        // remove sibling error node if present
+        const next = el.nextElementSibling
+        if(next && next.classList && next.classList.contains('field-error')) next.remove()
+      })
+      // clear selection-card error states (financingNeed)
+      const cards = document.querySelectorAll('[data-value]')
+      cards.forEach(c=>c.classList.remove('ring-2','ring-red-400'))
+    }catch(e){}
+  }
+
+  function showFieldErrors(missingIds){
+    try{
+      if(!missingIds || !missingIds.length) return
+      let firstEl = null
+      missingIds.forEach(id=>{
+        if(id === 'financingNeed'){
+          // highlight cards
+          document.querySelectorAll('[data-value]').forEach(card=>card.classList.add('ring-2','ring-red-400'))
+          return
+        }
+        const el = inputs[id]
+        if(!el) return
+        el.classList.add('border-red-400','ring-1','ring-red-300')
+        // append message if not present
+        const next = el.nextElementSibling
+        if(!(next && next.classList && next.classList.contains('field-error'))){
+          const msg = document.createElement('div')
+          msg.className = 'field-error text-xs text-red-600 mt-1'
+          msg.textContent = 'This field is required.'
+          el.parentNode.insertBefore(msg, el.nextSibling)
+        }
+        if(!firstEl) firstEl = el
+      })
+      if(firstEl) firstEl.focus()
+    }catch(e){}
   }
 
   // wiring initial state

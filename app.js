@@ -168,6 +168,7 @@
       if(!v.ok){ showFormError(v.messages); return }
       state.step += 1
       showStep(state.step)
+      updateProgressAndMotivation(state.step)
     } else {
       const v = validateStep(5)
       if(!v.ok){ showFormError(v.messages); return }
@@ -179,6 +180,7 @@
     if(state.step > 1){
       state.step -= 1
       showStep(state.step)
+      updateProgressAndMotivation(state.step)
     }
   })
 
@@ -204,12 +206,34 @@
     if(f && f.parentNode) f.parentNode.removeChild(f)
     out.feedback = null
     showStep(1)
+    updateProgressAndMotivation(1)
     // focus first input for convenience
     const firstInp = document.getElementById('monthlyIncome')
     if(firstInp) firstInp.focus()
   }
 
   if(resetBtn) resetBtn.addEventListener('click', resetForm)
+
+  function updateProgressAndMotivation(step){
+    try{
+      const pct = Math.round((step / 5) * 100)
+      const pctEl = document.getElementById('progressPercent')
+      const fill = document.getElementById('progressBarFill')
+      const mot = document.getElementById('motivational')
+      if(pctEl) pctEl.textContent = pct + '%'
+      if(fill) fill.style.width = pct + '%'
+      if(mot){
+        const msgs = {
+          1: 'You\'re off to a great start — choose the financing you need.',
+          2: 'Nice! Tell us about your monthly income to estimate affordability.',
+          3: 'Good progress — provide your business assets to help improve eligibility.',
+          4: 'Almost there — add liabilities so we can finalize the assessment.',
+          5: 'Final step — review and calculate your eligible loan amount.'
+        }
+        mot.textContent = msgs[step] || ''
+      }
+    }catch(e){/* ignore */}
+  }
 
   // Example loaders removed to encourage manual step-by-step input
 
@@ -272,6 +296,7 @@
   initInputs()
   // do not preselect any financing need; user will choose
   showStep(1)
+  updateProgressAndMotivation(1)
 
   // small accessibility: allow Enter to continue
   document.addEventListener('keydown', (e)=>{

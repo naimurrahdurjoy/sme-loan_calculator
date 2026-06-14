@@ -1,6 +1,4 @@
-# SME Shohoj Hishab — CRAB Bank
-https://sme-sohoj-hisab-2026.vercel.app
-Minimal single-page app for the "SME Shohoj Hishab Loan Estimation" conversational calculator.
+Minimal single-page app for the conversational calculator.
 
 Quick start
 

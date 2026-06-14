@@ -1,0 +1,10 @@
+{
+  "name": "brac-sme-emicalc",
+  "version": "1.0.0",
+  "description": "BRAC Bank SME Shohoj Hishab Loan Estimation calculator",
+  "scripts": {
+    "start": "python -m http.server 8000"
+  },
+  "author": "",
+  "license": "MIT"
+}

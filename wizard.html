@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SME Shohoj Hishab — BRAC Bank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#f4f7f6] min-h-screen">
+  <!-- Header -->
+  <header class="bg-[#003a6b] text-white">
+    <div class="container flex items-center justify-between py-4">
+      <div class="flex items-center gap-3">
+        <div class="w-36 h-10 bg-[#07203a] flex items-center justify-center rounded-md">
+          <span class="font-bold text-white">BRAC BANK</span>
+        </div>
+      </div>
+      <nav class="hidden md:flex gap-6">
+        <a class="text-white/90 hover:text-white" href="#">Products</a>
+        <a class="text-white/90 hover:text-white" href="#">SME Loan</a>
+        <a class="text-white/90 hover:text-white" href="#">Support</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container py-10">
+    <h1 class="text-center text-2xl md:text-3xl font-bold text-[#003a6b] mb-6">SME Shohoj Hishab (SME Loan Estimation)</h1>
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <!-- progress -->
+      <div class="p-4 border-b">
+        <div id="progress" class="flex items-center gap-2 justify-between">
+          <template id="step-template">
+            <div class="flex-1">
+              <div class="text-xs text-gray-400">Step <span class="step-num">1</span></div>
+              <div class="h-2 bg-gray-200 rounded mt-1"><div class="h-2 rounded bg-[#f4b400] w-0 step-fill"></div></div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <form id="wizardForm" novalidate>
+          <!-- Steps container -->
+          <div id="steps">
+            <!-- Step 1 -->
+            <section data-step="1" class="step-panel">
+              <h2 class="text-lg font-semibold text-[#07203a]">You're off to a great start — choose the financing you need.</h2>
+              <p class="text-sm text-gray-600 mt-2 mb-4">What type of financing do you need? <span class="text-red-600">*</span></p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button type="button" data-value="working" class="select-card p-4 rounded-lg border border-gray-200 text-left" aria-pressed="false">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#eef6fb] rounded flex items-center justify-center text-[#003a6b] font-bold">+</div>
+                    <div>
+                      <div class="font-semibold">Working Capital</div>
+                      <div class="text-sm text-gray-500">Short-term funds for daily operations and stock financing.</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button type="button" data-value="fixed" class="select-card p-4 rounded-lg border border-gray-200 text-left" aria-pressed="false">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#eef6fb] rounded flex items-center justify-center text-[#003a6b]">💼</div>
+                    <div>
+                      <div class="font-semibold">Fixed Asset</div>
+                      <div class="text-sm text-gray-500">Finance for machinery, equipment, or long-term investments.</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </section>
+
+            <!-- Step 2 -->
+            <section data-step="2" class="step-panel hidden">
+              <h2 class="text-lg font-semibold text-[#07203a]">Nice — tell us about monthly income to estimate affordability.</h2>
+              <p class="text-sm font-medium mt-3">Income & cashflow</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                <div>
+                  <label class="text-sm font-medium">Monthly Income <span class="text-red-600">*</span></label>
+                  <input name="monthlyIncome" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium">Monthly Business Expense <span class="text-red-600">*</span></label>
+                  <input name="businessExpense" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium">Personal & Family Expense <span class="text-red-600">*</span></label>
+                  <input name="personalExpense" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Step 3 -->
+            <section data-step="3" class="step-panel hidden">
+              <h2 class="text-lg font-semibold text-[#07203a]">Good progress — add your business assets to increase eligibility.</h2>
+              <p class="text-sm font-medium mt-3">Business Assets</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                <div>
+                  <label class="text-sm font-medium">Cash <span class="text-red-600">*</span></label>
+                  <input name="cash" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium">Stock <span class="text-red-600">*</span></label>
+                  <input name="stock" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium">Receivable <span class="text-red-600">*</span></label>
+                  <input name="receivable" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium">Fixed Asset <span class="text-red-600">*</span></label>
+                  <input name="fixedAsset" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Step 4 -->
+            <section data-step="4" class="step-panel hidden">
+              <h2 class="text-lg font-semibold text-[#07203a]">Almost there — include liabilities so we can finalise the assessment.</h2>
+              <p class="text-sm font-medium mt-3">Liabilities & commitments</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                <div>
+                  <label class="text-sm font-medium">Payable <span class="text-red-600">*</span></label>
+                  <input name="payable" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium">Loans & Debts <span class="text-red-600">*</span></label>
+                  <input name="loans" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="text-sm font-medium">Existing EMI <span class="text-red-600">*</span></label>
+                  <input name="existingEmi" type="number" min="0" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                  <p class="text-red-600 text-sm mt-1 hidden field-error">Required</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Step 5 -->
+            <section data-step="5" class="step-panel hidden">
+              <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-[#07203a]">Final step — review and calculate your eligible loan amount.</h2>
+                <button type="button" id="startOver" class="text-sm text-[#003a6b] underline">Start Over</button>
+              </div>
+
+              <p class="text-sm font-medium mt-3">Estimate Result</p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 mb-4">
+                <div>
+                  <label class="text-sm font-medium">Tenor (Years) <span class="text-red-600">*</span></label>
+                  <input name="tenorYears" id="tenorYears" type="number" min="1" value="3" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                </div>
+                <div>
+                  <label class="text-sm font-medium">Interest Rate (Annual %) <span class="text-red-600">*</span></label>
+                  <input name="annualRate" id="annualRate" type="number" min="0" step="0.01" value="16.75" class="mt-1 block w-full rounded-md border-gray-200 p-2" required />
+                </div>
+              </div>
+
+              <div class="bg-[#07203a] text-white rounded-lg p-4 mb-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm text-gray-200">Eligible Loan Amount</div>
+                    <div id="eligibleAmount" class="text-3xl font-bold mt-2">BDT 0</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-sm text-gray-200">Monthly EMI</div>
+                    <div id="monthlyEmi" class="text-2xl font-semibold mt-2">BDT 0</div>
+                    <div id="emiParams" class="text-xs text-gray-300 mt-1">Tenor: 3 years • Rate: 16.75%</div>
+                  </div>
+                </div>
+                <details class="mt-4 bg-white/10 p-2 rounded"><summary class="cursor-pointer">► Audit & calculations</summary>
+                  <div id="auditDetails" class="mt-2 text-sm text-gray-100"></div>
+                </details>
+              </div>
+
+            </section>
+
+          </div>
+
+          <!-- footer actions -->
+          <div class="flex items-center justify-between border-t pt-4">
+            <button type="button" id="backBtn" class="px-4 py-2 rounded bg-gray-100 text-gray-700 hidden">Back</button>
+            <div class="flex-1 text-center">
+              <button type="button" id="nextBtn" class="px-6 py-2 rounded bg-[#f4b400] text-[#07203a] font-semibold">Continue</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+  </main>
+
+  <!-- Stage 2: Final Estimation & Calculator (hidden until wizard completes) -->
+  <section id="stage2" class="container py-10 hidden">
+    <h1 class="text-center text-2xl md:text-3xl font-bold text-[#003a6b] mb-6">SME LOAN EMI CALCULATOR</h1>
+    <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <!-- Column 1: Inputs -->
+      <div class="bg-white rounded-lg p-4 shadow">
+        <label class="block text-sm font-medium text-[#003a6b]">Loan Amount (BDT)</label>
+        <div class="flex items-center gap-2 mt-2">
+          <input id="final-loan-amount" type="number" min="100000" step="1000" class="flex-1 rounded border-gray-200 p-2" />
+          <span class="text-sm text-gray-500">in BDT</span>
+        </div>
+        <input id="final-loan-range" type="range" min="100000" max="200000000" step="1000" class="w-full mt-3">
+
+        <label class="block text-sm font-medium text-[#003a6b] mt-4">Loan Tenure (Year)</label>
+        <div class="flex items-center gap-2 mt-2">
+          <input id="final-tenure" type="number" min="1" max="20" step="1" class="flex-1 rounded border-gray-200 p-2" />
+          <span class="text-sm text-gray-500">years</span>
+        </div>
+        <input id="final-tenure-range" type="range" min="1" max="20" step="1" class="w-full mt-3">
+
+        <label class="block text-sm font-medium text-[#003a6b] mt-4">Rate of Interest (%)</label>
+        <div class="flex items-center gap-2 mt-2">
+          <input id="final-rate" type="number" min="1" max="20" step="0.1" class="flex-1 rounded border-gray-200 p-2" />
+          <span class="text-sm text-gray-500">per annum</span>
+        </div>
+        <input id="final-rate-range" type="range" min="1" max="20" step="0.1" class="w-full mt-3">
+      </div>
+
+      <!-- Column 2: Result Callout -->
+      <div class="bg-white rounded-lg p-6 shadow text-center">
+        <h2 class="text-md font-semibold text-[#003a6b]">Equal Monthly Installment (EMI)</h2>
+        <div id="final-emi" class="text-3xl font-bold text-[#003a6b] mt-4">BDT 0</div>
+        <button id="applyNowFinal" class="mt-6 px-6 py-2 rounded bg-[#f4b400] text-[#07203a] font-bold">Apply Now</button>
+      </div>
+
+      <!-- Column 3: Breakdown -->
+      <div class="bg-white rounded-lg p-4 shadow">
+        <h3 class="text-md font-semibold text-[#003a6b]">Break-down of Total Payment</h3>
+        <div class="chart-wrap my-4 flex justify-center">
+          <svg id="final-arc" viewBox="0 0 200 100" class="w-full max-w-xs" role="img" aria-label="Payment breakdown">
+            <path class="arc-bg" d="M10 90 A90 90 0 0 1 190 90" stroke="#e6eef8" stroke-width="16" fill="none" stroke-linecap="round"/>
+            <path id="final-arc-principal" d="" stroke="#003a6b" stroke-width="16" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="legend">
+          <div class="flex items-center justify-between py-2 border-t"><div class="flex items-center gap-2"><span class="w-4 h-4 bg-[#003a6b] block"></span><span>Principal Amount</span></div><strong id="final-principal">BDT 0</strong></div>
+          <div class="flex items-center justify-between py-2 border-t"><div class="flex items-center gap-2"><span class="w-4 h-4 bg-[#9fb8d8] block"></span><span>Interest Amount</span></div><strong id="final-interest">BDT 0</strong></div>
+          <div class="flex items-center justify-between py-3 border-t font-semibold"><span>Total Payable Amount</span><strong id="final-total">BDT 0</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-center text-sm text-gray-500 mt-6">This is an indicative amount. Tax, Excise duty will be applicable on the account as per Govt. regulation.</p>
+  </section>
+
+  <script src="wizard.js"></script>
+</body>
+</html>

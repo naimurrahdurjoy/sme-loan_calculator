@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BRAC Bank — SME Shohoj Hishab Loan Estimation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Shared site header (BRAC Bank corporate) -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="#" class="brand" aria-label="BRAC Bank home">
+        <img src="/brac-bank-logo.svg" alt="BRAC Bank" class="brand-logo" width="36" height="36" />
+        <span class="brand-name">BRAC BANK</span>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-tagline">আস্থা অবিচল</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Segment navigation">
+        <a href="#">Retail</a>
+        <span class="nav-sep" aria-hidden="true">|</span>
+        <a href="#" class="active">SME</a>
+        <span class="nav-sep" aria-hidden="true">|</span>
+        <a href="#">Corporate</a>
+      </nav>
+
+      <div class="header-utils">
+        <button type="button" class="icon-btn" aria-label="Search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        </button>
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" class="lang-btn active" aria-pressed="true">EN</button>
+          <button type="button" class="lang-btn" aria-pressed="false">BN</button>
+        </div>
+        <a href="tel:16221" class="hotline-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <strong>16221</strong>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- STAGE 1: Multi-step wizard (visible on initial load) -->
+  <div id="stage-wizard">
+    <main class="container wizard-main">
+      <h1 class="wizard-title">SME Loan Estimation</h1>
+      <p class="wizard-subtitle" id="stepMotivation">You're off to a great start — choose the financing you need.</p>
+
+      <div class="wizard-card">
+        <div class="wizard-progress" id="progressBar" aria-hidden="true">
+          <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+          <span class="progress-label" id="progressLabel">Step 1 of 4</span>
+        </div>
+
+        <form id="wizardForm" novalidate>
+          <section class="step-panel" data-step="1">
+            <h2 class="step-heading">What type of financing do you need? <span class="req">*</span></h2>
+            <div class="select-grid">
+              <button type="button" class="select-card" data-value="fixed" aria-pressed="false">
+                <span class="select-icon" aria-hidden="true">🏭</span>
+                <span class="select-label">Fixed Asset</span>
+                <span class="select-desc">Finance for machinery, equipment, or long-term investments.</span>
+              </button>
+              <button type="button" class="select-card" data-value="working" aria-pressed="false">
+                <span class="select-icon" aria-hidden="true">📦</span>
+                <span class="select-label">Working Capital</span>
+                <span class="select-desc">Short-term funds for daily operations and stock financing.</span>
+              </button>
+            </div>
+            <p class="field-error hidden" id="financingError">Please select a financing type.</p>
+          </section>
+
+          <section class="step-panel hidden" data-step="2">
+            <h2 class="step-heading">Income &amp; Expenses</h2>
+            <div class="input-grid input-grid-2">
+              <div class="field">
+                <label for="monthlyIncome">Monthly Income <span class="req">*</span></label>
+                <input type="number" id="monthlyIncome" name="monthlyIncome" min="0" required />
+              </div>
+              <div class="field">
+                <label for="businessExpense">Monthly Business Expense <span class="req">*</span></label>
+                <input type="number" id="businessExpense" name="businessExpense" min="0" required />
+              </div>
+              <div class="field">
+                <label for="personalExpense">Personal &amp; Family Expense (Monthly) <span class="req">*</span></label>
+                <input type="number" id="personalExpense" name="personalExpense" min="0" required />
+              </div>
+              <div class="field">
+                <label for="existingEmi">Existing EMI (If Applicable) <span class="req">*</span></label>
+                <input type="number" id="existingEmi" name="existingEmi" min="0" value="0" required />
+              </div>
+            </div>
+          </section>
+
+          <section class="step-panel hidden" data-step="3">
+            <h2 class="step-heading">Asset Registry</h2>
+            <div class="input-grid input-grid-2">
+              <div class="field">
+                <label for="cash">Cash <span class="req">*</span></label>
+                <input type="number" id="cash" name="cash" min="0" required />
+              </div>
+              <div class="field">
+                <label for="stock">Stock <span class="req">*</span></label>
+                <input type="number" id="stock" name="stock" min="0" required />
+              </div>
+              <div class="field">
+                <label for="receivable">Receivable <span class="req">*</span></label>
+                <input type="number" id="receivable" name="receivable" min="0" required />
+              </div>
+              <div class="field">
+                <label for="fixedAsset">Fixed Asset <span class="req">*</span></label>
+                <input type="number" id="fixedAsset" name="fixedAsset" min="0" required />
+              </div>
+            </div>
+          </section>
+
+          <section class="step-panel hidden" data-step="4">
+            <h2 class="step-heading">Liabilities &amp; Parameters</h2>
+            <div class="input-grid input-grid-2">
+              <div class="field">
+                <label for="payable">Payable <span class="req">*</span></label>
+                <input type="number" id="payable" name="payable" min="0" required />
+              </div>
+              <div class="field">
+                <label for="loans">Loans &amp; Debts <span class="req">*</span></label>
+                <input type="number" id="loans" name="loans" min="0" required />
+              </div>
+              <div class="field">
+                <label for="tenorYears">Tenor (Years) <span class="req">*</span></label>
+                <input type="number" id="tenorYears" name="tenorYears" min="1" max="20" step="1" value="3" required />
+              </div>
+              <div class="field">
+                <label for="interestRate">Interest Rate (%) <span class="req">*</span></label>
+                <input type="number" id="interestRate" name="interestRate" min="0" max="30" step="0.01" value="16.75" required />
+              </div>
+            </div>
+          </section>
+
+          <div class="wizard-actions">
+            <button type="button" id="backBtn" class="btn-secondary hidden">Back</button>
+            <button type="button" id="nextBtn" class="btn-primary">Continue</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- STAGE 2: EMI dashboard (hidden until submission) -->
+  <div id="stage-dashboard" class="hidden" aria-hidden="true">
+    <main class="container">
+      <section class="calculator-section" aria-labelledby="emi-heading">
+        <h1 id="emi-heading" class="section-title">SME LOAN EMI CALCULATOR</h1>
+
+        <div class="calculator-grid" role="region" aria-label="EMI calculator">
+          <div class="calc-panel inputs">
+            <label for="loan-amount">Loan Amount (BDT)</label>
+            <div class="input-row">
+              <input type="number" id="loan-amount" class="number-input" min="100000" max="200000000" step="1000" aria-describedby="loan-amount-help">
+              <span class="help-text" id="loan-amount-help">in BDT</span>
+            </div>
+            <input type="range" id="loan-amount-range" min="100000" max="200000000" step="1000">
+
+            <label for="tenure-years">Loan Tenure (Year)</label>
+            <div class="input-row">
+              <input type="number" id="tenure-years" class="number-input" min="1" max="20" step="1" aria-describedby="tenure-help">
+              <span class="help-text" id="tenure-help">years</span>
+            </div>
+            <input type="range" id="tenure-range" min="1" max="20" step="1">
+
+            <label for="interest-rate">Rate of Interest (%)</label>
+            <div class="input-row">
+              <input type="number" id="interest-rate" class="number-input" min="1" max="20" step="0.1" aria-describedby="interest-help">
+              <span class="help-text" id="interest-help">per annum</span>
+            </div>
+            <input type="range" id="interest-range" min="1" max="20" step="0.1">
+          </div>
+
+          <div class="calc-panel result-card" aria-live="polite">
+            <div class="result-inner">
+              <h2>Equal Monthly Installment (EMI)</h2>
+              <div class="emi-display" id="emi-value">BDT 0</div>
+              <button class="cta-apply" id="apply-btn" type="button">Apply Now</button>
+            </div>
+          </div>
+
+          <div class="calc-panel breakdown">
+            <h3>Break-down of Total Payment</h3>
+            <div class="chart-wrap" aria-hidden="true">
+              <svg id="arc-chart" viewBox="0 0 200 100" class="semi-arc" role="img" aria-label="Payment breakdown chart">
+                <path class="arc-bg" d="M10 90 A90 90 0 0 1 190 90" stroke-linecap="round" stroke-width="16" fill="none"/>
+                <path id="arc-principal" d="" stroke-linecap="round" stroke-width="16" fill="none"/>
+                <path id="arc-interest" d="" stroke-linecap="round" stroke-width="16" fill="none"/>
+              </svg>
+            </div>
+            <div class="legend">
+              <div class="legend-row">
+                <span class="legend-color principal"></span><span>Principal Amount</span>
+                <strong id="principal-value">0</strong>
+              </div>
+              <div class="legend-row">
+                <span class="legend-color interest"></span><span>Interest Amount</span>
+                <strong id="interest-value">0</strong>
+              </div>
+              <div class="legend-row total">
+                <span>Total Payable Amount</span>
+                <strong id="total-value">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="note">This is an indicative amount. Tax, Excise duty will be applicable on the account as per Govt. regulation.</p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Shared site footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-col footer-contact">
+          <h4>Address</h4>
+          <address>
+            BRAC Bank PLC, Anik Tower, 220/B Tejgaon-Gulshan Link Road, Tejgaon, Dhaka 1208, Bangladesh
+          </address>
+
+          <h4 class="footer-subheading">Phone</h4>
+          <ul class="contact-list">
+            <li>
+              <a href="tel:08000016221">08 0000 16221</a>
+              <span class="contact-note">[Toll Free Number, For Local Phone Users]</span>
+            </li>
+            <li>
+              <a href="tel:+8809611223344">+88 096 11223344</a>
+              <span class="contact-note">[For Local and Foreign Callers]</span>
+            </li>
+            <li>
+              <a href="tel:+880255668055">+88 02 55668055</a>
+              <span class="contact-note">[For Local and Foreign Callers]</span>
+            </li>
+            <li>
+              <a href="tel:+880255668056">+88 02 55668056</a>
+              <span class="contact-note">[For Local and Foreign Callers]</span>
+            </li>
+          </ul>
+
+          <h4 class="footer-subheading">Fax</h4>
+          <p class="footer-text">+880 2 881 3583</p>
+        </div>
+
+        <div class="footer-col">
+          <ul class="footer-links">
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Career</a></li>
+            <li><a href="#">Financial Literacy</a></li>
+            <li><a href="#">CSR</a></li>
+            <li><a href="#">Citizen Charter</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Investor Relations</a></li>
+            <li><a href="#">Forex Rates</a></li>
+            <li><a href="#">Risk Based Capital</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col footer-col-last">
+          <ul class="footer-links">
+            <li><a href="#">Credit Rating</a></li>
+            <li><a href="#">Media</a></li>
+            <li><a href="#">E-Tender</a></li>
+            <li><a href="#">SWIFT: BRAKBDDH</a></li>
+          </ul>
+
+          <div class="social-links" aria-label="Social media">
+            <a href="#" class="social-icon" aria-label="Facebook">f</a>
+            <a href="#" class="social-icon" aria-label="LinkedIn">in</a>
+            <a href="#" class="social-icon" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2"/></svg>
+            </a>
+            <a href="#" class="social-icon" aria-label="YouTube">▶</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="author-box">
+          <p>© 2026 Copyright Md. Naimur Rahman — Compass Intern, Market Intelligence and Transformation, Email: <a href="mailto:md.naimur.rahman@g.bracu.ac.bd">md.naimur.rahman@g.bracu.ac.bd</a></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="loan-app.js"></script>
+</body>
+</html>

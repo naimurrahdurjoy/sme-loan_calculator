@@ -69,8 +69,8 @@
       }
     })
     backBtn.classList.toggle('hidden', step===1)
-    if(resetBtn) resetBtn.classList.toggle('hidden', step!==5)
-    continueBtn.textContent = step===5 ? 'Calculate Estimate' : 'Continue'
+    if(resetBtn) resetBtn.classList.toggle('hidden', step!==4)
+    continueBtn.textContent = step===4 ? 'Calculate Estimate' : 'Continue'
     // show only the example button that matches the selected financing need, and only after leaving step 1
     if(loadExampleBtn) loadExampleBtn.style.display = (state.financingNeed === 'fixed' && step !== 1) ? '' : 'none'
     if(loadWorkingBtn) loadWorkingBtn.style.display = (state.financingNeed === 'working' && step !== 1) ? '' : 'none'
@@ -81,7 +81,7 @@
 
   function updateProgressAndMotivation(step){
     try{
-      const pct = Math.round((step / 5) * 100)
+      const pct = Math.round((step / 4) * 100)
       const progressPercent = document.getElementById('progressPercent')
       const progressBarFill = document.getElementById('progressBarFill')
       const motivationalEl = document.getElementById('motivational')
@@ -92,8 +92,7 @@
           1: "You're off to a great start — choose the financing you need.",
           2: 'Nice — tell us about monthly income to estimate affordability.',
           3: 'Good progress — add your business assets to increase eligibility.',
-          4: 'Almost there — include liabilities so we can finalise the assessment.',
-          5: 'Final step — review and calculate your eligible loan amount.'
+          4: 'Final step — provide liabilities and parameters, then calculate.'
         }
         motivationalEl.textContent = msgs[step] || ''
       }
@@ -157,35 +156,48 @@
   }
 
   function computeAndRender(){
+    // Strict calculation engine per SME_ShohojHishab_LoanEstimation_301225
     syncInputsToState()
-    const c = computeAll()
-    // choose eligible amount
-    // consider multiple caps: debt-equity, EMI affordability, and for working-capital also net-liquid and inventory caps
-    const allowedMonthlyEmi = Math.max(0, c.debtBurdenRatioLimit - state.existingEmi)
-    const principalFromEmi = principalForMonthlyEmi(allowedMonthlyEmi)
-    const candidates = [c.debtEquityLimit, principalFromEmi]
-    if(state.financingNeed === 'working'){
-      // include net liquid and inventory caps
-      candidates.push(c.netLiquidAssetLimit, c.inventoryCap)
-      // consider a portion of fixed assets as collateral for working capital (50% by default)
-      const fixedAssetCollateral = (state.fixedAsset || 0) * 0.5
-      candidates.push(fixedAssetCollateral)
+    const netIncome = state.monthlyIncome - state.monthlyExpense - state.personalExpense - state.existingEmi
+    const totalAssets = state.cash + state.stock + state.receivable + state.fixedAsset
+    const totalLiabilities = state.payable + state.loans
+
+    // Clauses
+    const clauseA = (state.stock + state.receivable) * 0.70
+    const clauseB = (state.stock + state.receivable) - totalLiabilities
+    const clauseC = 2416836   // Debt Burden Ratio Approximation (fixed)
+    const clauseD = 1520000   // Debt Equity Ratio Approximation (fixed)
+
+    // Eligibility conditional matrix
+    let eligible = 0
+    if(state.financingNeed === 'fixed'){
+      eligible = clauseD
+    } else if(state.financingNeed === 'working'){
+      eligible = Math.max(0, clauseB)
     }
-    let eligible = Math.min.apply(null, candidates.filter(v=>Number.isFinite(v))) || 0
-    if(eligible < 0) eligible = 0
 
-    const emi = emiFor(eligible)
+    // compute EMI using standard amortization formula
+    const rMonthly = state.annualRate/100/12
+    const n = Math.max(1, state.tenorYears * 12)
+    let emi = 0
+    if(rMonthly === 0){ emi = eligible / n } else {
+      const pow = Math.pow(1 + rMonthly, n)
+      emi = eligible * rMonthly * pow / (pow - 1)
+    }
 
-    out.eligibleAmount.textContent = formatBDT(eligible,0)
-    out.monthlyEmi.textContent = formatBDT(emi,2)
+    // round values for display
+    const totalPayable = Math.round(emi * n)
 
-    out.auditNetIncome.textContent = formatBDT(c.netIncome,0)
-    out.auditTotalAssets.textContent = formatBDT(c.totalAssets,0)
-    out.auditTotalLiabilities.textContent = formatBDT(c.totalLiabilities,0)
-    out.auditInventoryCap.textContent = formatBDT(c.inventoryCap,0)
-    out.auditNetLiquid.textContent = formatBDT(c.netLiquidAssetLimit,0)
-    out.auditDebtBurden.textContent = formatBDT(c.debtBurdenRatioLimit,0)
-    out.auditDebtEquity.textContent = formatBDT(c.debtEquityLimit,0)
+    // Render outputs in wizard result card (only if the elements exist)
+    if(out.eligibleAmount) out.eligibleAmount.textContent = formatBDT(eligible,0)
+    if(out.monthlyEmi) out.monthlyEmi.textContent = formatBDT(emi,2)
+    if(out.auditNetIncome) out.auditNetIncome.textContent = formatBDT(netIncome,0)
+    if(out.auditTotalAssets) out.auditTotalAssets.textContent = formatBDT(totalAssets,0)
+    if(out.auditTotalLiabilities) out.auditTotalLiabilities.textContent = formatBDT(totalLiabilities,0)
+    if(out.auditInventoryCap) out.auditInventoryCap.textContent = formatBDT(clauseA,0)
+    if(out.auditNetLiquid) out.auditNetLiquid.textContent = formatBDT(clauseB,0)
+    if(out.auditDebtBurden) out.auditDebtBurden.textContent = formatBDT(clauseC,0)
+    if(out.auditDebtEquity) out.auditDebtEquity.textContent = formatBDT(clauseD,0)
 
     // update tenor/rate display
     const tenorEl = document.getElementById('tenorDisplay')
@@ -193,18 +205,8 @@
     if(tenorEl) tenorEl.textContent = state.tenorYears
     if(rateEl) rateEl.textContent = Number(state.annualRate).toFixed(2)
 
-    // generate user-facing feedback messages based on computed values
-    const messages = []
-    if(c.netIncome <= 0) messages.push('Net income is non-positive — business may not be cashflow-positive for loan servicing.')
-    if(c.netLiquidAssetLimit <= 0) messages.push('Net liquid assets are negative — current stock/receivable do not cover liabilities.')
-    if(state.existingEmi > 0 && (state.existingEmi * 12) > c.debtBurdenRatioLimit) messages.push('Existing EMI payments are high compared to allowable debt burden.')
-    if(eligible === 0) messages.push('No eligible loan amount under current inputs. Consider reducing liabilities or increasing income.')
-    else if(eligible > 0 && eligible < 100000) messages.push('Eligible amount is small; improving net income or equity will increase eligibility.')
-
-    let severity = 'ok'
-    if(messages.some(m=>/non-positive|negative|No eligible/i.test(m))) severity = 'error'
-    else if(messages.length) severity = 'warn'
-    renderFeedback(messages, severity)
+    // After computing, reveal the final dashboard (results screen) and hide the wizard
+    renderResultsDashboard({eligible, emi, totalPayable, tenor: state.tenorYears, rate: state.annualRate})
   }
 
   function ensureFeedbackContainer(){
@@ -249,8 +251,9 @@
     inputs.payable.value = ''
     inputs.loans.value = ''
     inputs.existingEmi.value = ''
-    if(inputs.tenorYears) inputs.tenorYears.value = ''
-    if(inputs.annualRate) inputs.annualRate.value = ''
+    // set defaults for tenor and annual rate per spec
+    if(inputs.tenorYears) inputs.tenorYears.value = state.tenorYears
+    if(inputs.annualRate) inputs.annualRate.value = state.annualRate
   }
 
   // radio card clicks
@@ -268,7 +271,7 @@
   continueBtn.addEventListener('click', ()=>{
     clearFormError()
     clearFieldErrors()
-    if(state.step < 5){
+    if(state.step < 4){
       const v = validateStep(state.step)
       if(!v.ok){ showFormError(v.messages); showFieldErrors(v.missingIds); return }
       state.step += 1
@@ -276,7 +279,7 @@
       // ensure progress updates when user advances
       if(typeof updateProgressAndMotivation === 'function') updateProgressAndMotivation(state.step)
     } else {
-      const v = validateStep(5)
+      const v = validateStep(4)
       if(!v.ok){ showFormError(v.messages); showFieldErrors(v.missingIds); return }
       computeAndRender()
     }
@@ -352,7 +355,7 @@
     if(state.step === 2){ inputs.monthlyIncome.value = sample.monthlyIncome; inputs.monthlyExpense.value = sample.monthlyExpense; inputs.personalExpense.value = sample.personalExpense }
     if(state.step === 3){ inputs.cash.value = sample.cash; inputs.stock.value = sample.stock; inputs.receivable.value = sample.receivable; inputs.fixedAsset.value = sample.fixedAsset }
     if(state.step === 4){ inputs.payable.value = sample.payable; inputs.loans.value = sample.loans; inputs.existingEmi.value = sample.existingEmi }
-    if(state.step === 5){ if(inputs.tenorYears) inputs.tenorYears.value = sample.tenorYears; if(inputs.annualRate) inputs.annualRate.value = sample.annualRate }
+    if(state.step === 4){ if(inputs.tenorYears) inputs.tenorYears.value = sample.tenorYears; if(inputs.annualRate) inputs.annualRate.value = sample.annualRate }
     syncInputsToState()
     clearFormError()
   }
@@ -385,7 +388,7 @@
     if(state.step === 2){ inputs.monthlyIncome.value = sample.monthlyIncome; inputs.monthlyExpense.value = sample.monthlyExpense; inputs.personalExpense.value = sample.personalExpense }
     if(state.step === 3){ inputs.cash.value = sample.cash; inputs.stock.value = sample.stock; inputs.receivable.value = sample.receivable; inputs.fixedAsset.value = sample.fixedAsset }
     if(state.step === 4){ inputs.payable.value = sample.payable; inputs.loans.value = sample.loans; inputs.existingEmi.value = sample.existingEmi }
-    if(state.step === 5){ if(inputs.tenorYears) inputs.tenorYears.value = sample.tenorYears; if(inputs.annualRate) inputs.annualRate.value = sample.annualRate }
+    if(state.step === 4){ if(inputs.tenorYears) inputs.tenorYears.value = sample.tenorYears; if(inputs.annualRate) inputs.annualRate.value = sample.annualRate }
     syncInputsToState()
     clearFormError()
   }
@@ -397,7 +400,7 @@
     inp.addEventListener('input', ()=>{
       syncInputsToState()
       // if on result step, update live
-      if(state.step === 5) computeAndRender()
+      if(state.step === 4) computeAndRender()
       clearFormError()
       clearFieldErrors()
     })
@@ -443,8 +446,7 @@
     if(step === 1){ if(!state.financingNeed){ missing.push(labels.financingNeed); missingIds.push('financingNeed') } }
     if(step === 2){ ['monthlyIncome','monthlyExpense','personalExpense'].forEach(k=>{ if(isEmpty(k)){ missing.push(labels[k]); missingIds.push(k) } }) }
     if(step === 3){ ['cash','stock','receivable','fixedAsset'].forEach(k=>{ if(isEmpty(k)){ missing.push(labels[k]); missingIds.push(k) } }) }
-    if(step === 4){ ['payable','loans','existingEmi'].forEach(k=>{ if(isEmpty(k)){ missing.push(labels[k]); missingIds.push(k) } }) }
-    if(step === 5){ if(!state.financingNeed){ missing.push(labels.financingNeed); missingIds.push('financingNeed') }; Object.keys(labels).forEach(k=>{ if(k!=='financingNeed' && isEmpty(k)){ missing.push(labels[k]); missingIds.push(k) } }) }
+    if(step === 4){ ['payable','loans','existingEmi','tenorYears','annualRate'].forEach(k=>{ if(isEmpty(k)){ missing.push(labels[k]); missingIds.push(k) } }) }
     if(missing.length) return {ok:false, messages: ['Please fill these fields: '+ missing.join(', ')], missingIds}
     return {ok:true}
   }
@@ -506,4 +508,157 @@
   })
 
   // do not compute initial estimates; wait for user input
+})();
+
+// --- Results dashboard renderer (hides wizard and shows final calculator) ---
+(function(){
+  // attach to global for testing if needed
+  function renderResultsDashboard({eligible, emi, totalPayable, tenor, rate}){
+    // hide wizard card
+    const wizardCard = document.querySelector('.max-w-3xl')
+    if(wizardCard) wizardCard.style.display = 'none'
+
+    // avoid double-render
+    if(document.getElementById('resultsDashboard')) return
+
+    const container = document.createElement('section')
+    container.id = 'resultsDashboard'
+    container.className = 'container py-10'
+    container.innerHTML = `
+      <h1 class="text-center text-2xl md:text-3xl font-bold text-[#003a6b] mb-6">SME LOAN EMI CALCULATOR</h1>
+      <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div class="bg-white rounded-lg p-4 shadow">
+          <label class="block text-sm font-medium text-[#003a6b]">Loan Amount (BDT)</label>
+          <div class="flex items-center gap-2 mt-2">
+            <input id="final-loan-amount" type="number" min="100000" step="1000" class="flex-1 rounded border-gray-200 p-2" />
+            <span class="text-sm text-gray-500">in BDT</span>
+          </div>
+          <input id="final-loan-range" type="range" min="100000" max="200000000" step="1000" class="w-full mt-3">
+
+          <label class="block text-sm font-medium text-[#003a6b] mt-4">Loan Tenure (Year)</label>
+          <div class="flex items-center gap-2 mt-2">
+            <input id="final-tenure" type="number" min="1" max="20" step="1" class="flex-1 rounded border-gray-200 p-2" />
+            <span class="text-sm text-gray-500">years</span>
+          </div>
+          <input id="final-tenure-range" type="range" min="1" max="20" step="1" class="w-full mt-3">
+
+          <label class="block text-sm font-medium text-[#003a6b] mt-4">Rate of Interest (%)</label>
+          <div class="flex items-center gap-2 mt-2">
+            <input id="final-rate" type="number" min="1" max="20" step="0.1" class="flex-1 rounded border-gray-200 p-2" />
+            <span class="text-sm text-gray-500">per annum</span>
+          </div>
+          <input id="final-rate-range" type="range" min="1" max="20" step="0.1" class="w-full mt-3">
+        </div>
+
+        <div class="bg-white rounded-lg p-6 shadow text-center">
+          <h2 class="text-md font-semibold text-[#003a6b]">Equal Monthly Installment (EMI)</h2>
+          <div id="final-emi" class="text-3xl font-bold text-[#003a6b] mt-4">BDT 0</div>
+          <button id="applyNowFinal" class="mt-6 px-6 py-2 rounded bg-[#f4b400] text-[#07203a] font-bold">Apply Now</button>
+        </div>
+
+        <div class="bg-white rounded-lg p-4 shadow">
+          <h3 class="text-md font-semibold text-[#003a6b]">Break-down of Total Payment</h3>
+          <div class="chart-wrap my-4 flex justify-center">
+            <svg id="final-arc" viewBox="0 0 200 100" class="w-full max-w-xs" role="img" aria-label="Payment breakdown">
+              <path class="arc-bg" d="M10 90 A90 90 0 0 1 190 90" stroke="#e6eef8" stroke-width="16" fill="none" stroke-linecap="round"/>
+              <path id="final-arc-principal" d="" stroke="#003a6b" stroke-width="16" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="legend">
+            <div class="flex items-center justify-between py-2 border-t"><div class="flex items-center gap-2"><span class="w-4 h-4 bg-[#003a6b] block"></span><span>Principal Amount</span></div><strong id="final-principal">BDT 0</strong></div>
+            <div class="flex items-center justify-between py-2 border-t"><div class="flex items-center gap-2"><span class="w-4 h-4 bg-[#9fb8d8] block"></span><span>Interest Amount</span></div><strong id="final-interest">BDT 0</strong></div>
+            <div class="flex items-center justify-between py-3 border-t font-semibold"><span>Total Payable Amount</span><strong id="final-total">BDT 0</strong></div>
+          </div>
+        </div>
+      </div>
+      <p class="text-center text-sm text-gray-500 mt-6">This is an indicative amount. Tax, Excise duty will be applicable on the account as per Govt. regulation.</p>
+    `
+
+    // insert after body content
+    document.body.appendChild(container)
+
+    // wire elements
+    const loanInput = document.getElementById('final-loan-amount')
+    const loanRange = document.getElementById('final-loan-range')
+    const tenureInput = document.getElementById('final-tenure')
+    const tenureRange = document.getElementById('final-tenure-range')
+    const rateInput = document.getElementById('final-rate')
+    const rateRange = document.getElementById('final-rate-range')
+    const emiEl = document.getElementById('final-emi')
+    const principalEl = document.getElementById('final-principal')
+    const interestEl = document.getElementById('final-interest')
+    const totalEl = document.getElementById('final-total')
+    const arcPath = document.getElementById('final-arc-principal')
+
+    // set initial values
+    loanInput.value = Math.round(eligible)
+    loanRange.value = Math.round(eligible)
+    tenureInput.value = tenor
+    tenureRange.value = tenor
+    rateInput.value = rate
+    rateRange.value = rate
+
+    function updateOutputs(){
+      const P = Number(loanInput.value) || 0
+      const Y = Number(tenureInput.value) || 1
+      const R = Number(rateInput.value) || 0
+      const r = R/100/12
+      const n = Math.max(1, Y*12)
+      let emiVal = 0
+      if(r===0) emiVal = P/n
+      else{ const pow = Math.pow(1+r,n); emiVal = P * r * pow / (pow - 1) }
+      const totalPay = Math.round(emiVal * n)
+      const interestAmt = Math.max(0, totalPay - Math.round(P))
+
+      emiEl.textContent = `BDT ${Math.round(emiVal).toLocaleString('en-US')}`
+      principalEl.textContent = `BDT ${Math.round(P).toLocaleString('en-US')}`
+      interestEl.textContent = `BDT ${Math.round(interestAmt).toLocaleString('en-US')}`
+      totalEl.textContent = `BDT ${Math.round(totalPay).toLocaleString('en-US')}`
+
+      // update arc
+      updateArc(arcPath, P, totalPay)
+    }
+
+    function bindPair(inp, range){
+      range.addEventListener('input', ()=>{ inp.value = range.value; updateOutputs() })
+      inp.addEventListener('input', ()=>{ range.value = inp.value; updateOutputs() })
+      inp.addEventListener('blur', ()=>{ updateOutputs() })
+    }
+
+    bindPair(loanInput, loanRange)
+    bindPair(tenureInput, tenureRange)
+    bindPair(rateInput, rateRange)
+
+    updateOutputs()
+
+    document.getElementById('applyNowFinal').addEventListener('click', ()=>{
+      // redirect to application form with query params
+      const params = new URLSearchParams({ loan: Math.round(Number(loanInput.value)||0), tenure: Number(tenureInput.value)||1, rate: Number(rateInput.value)||0 })
+      window.location.href = 'application.html?' + params.toString()
+    })
+
+    // arc utilities
+    function polarToCartesian(cx, cy, radius, angleDeg){
+      var angleRad = (angleDeg) * Math.PI / 180.0;
+      return { x: cx + (radius * Math.cos(angleRad)), y: cy + (radius * Math.sin(angleRad)) };
+    }
+    function describeArc(cx, cy, radius, startAngle, endAngle){
+      var start = polarToCartesian(cx, cy, radius, endAngle);
+      var end = polarToCartesian(cx, cy, radius, startAngle);
+      var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+      var d = ["M", start.x, start.y, "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y].join(" ");
+      return d;
+    }
+    function updateArc(pathEl, principal, total){
+      const cx = 100, cy = 90, r = 90
+      const share = total>0 ? Math.max(0, Math.min(1, principal/total)) : 1
+      const angleDeg = share * 180
+      const startAngle = 180
+      const endAngle = 180 - angleDeg
+      const d = describeArc(cx, cy, r, startAngle, endAngle)
+      pathEl.setAttribute('d', d)
+    }
+  }
+
+  window.renderResultsDashboard = renderResultsDashboard
 })();

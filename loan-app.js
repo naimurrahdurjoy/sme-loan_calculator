@@ -47,6 +47,12 @@
   const arcPrincipal = document.getElementById('arc-principal');
   const arcInterest = document.getElementById('arc-interest');
   const applyBtn = document.getElementById('apply-btn');
+  const backToAssessmentBtn = document.getElementById('backToAssessmentBtn');
+  const stageRejected = document.getElementById('stage-rejected');
+  const tryAgainBtn = document.getElementById('tryAgainBtn');
+  const brandLogoLink = document.querySelector('.brand');
+
+  let cachedResult = null;
 
   // ── Formatting & EMI math ──────────────────────────────────────
   function fmt(n) {
@@ -198,12 +204,37 @@
   function submitWizard() {
     var data = gatherFormData();
     var result = runEstimationEngine(data);
+
+    if (result.netIncome <= 0 || (data.stock + data.receivable) <= result.totalLiability) {
+      return showRejection(result, data);
+    }
+
+    cachedResult = result;
     revealDashboard(result);
+  }
+
+  function showRejection(result, data) {
+    stageWizard.classList.add('hidden');
+    stageWizard.setAttribute('aria-hidden', 'true');
+    stageDashboard.classList.add('hidden');
+    stageDashboard.setAttribute('aria-hidden', 'true');
+    stageRejected.classList.remove('hidden');
+    stageRejected.setAttribute('aria-hidden', 'false');
+
+    document.getElementById('reject-reason-netincome').textContent = result.netIncome <= 0
+      ? 'Net income is insufficient after expenses.'
+      : 'Net income is enough to operate but not enough for bank-backed repayment coverage.';
+
+    document.getElementById('reject-reason-assets').textContent = (data.stock + data.receivable) <= result.totalLiability
+      ? 'Short-term asset coverage does not meet current liability needs.'
+      : 'Short-term asset coverage is below baseline bank credit metrics.';
   }
 
   function revealDashboard(result) {
     stageWizard.classList.add('hidden');
     stageWizard.setAttribute('aria-hidden', 'true');
+    stageRejected.classList.add('hidden');
+    stageRejected.setAttribute('aria-hidden', 'true');
 
     stageDashboard.classList.remove('hidden');
     stageDashboard.setAttribute('aria-hidden', 'false');
@@ -300,6 +331,55 @@
     window.location.href = 'application.html?' + params.toString();
   });
 
+  backToAssessmentBtn.addEventListener('click', function () {
+    stageDashboard.classList.add('hidden');
+    stageDashboard.setAttribute('aria-hidden', 'true');
+    stageRejected.classList.add('hidden');
+    stageRejected.setAttribute('aria-hidden', 'true');
+    stageWizard.classList.remove('hidden');
+    stageWizard.setAttribute('aria-hidden', 'false');
+    showStep(TOTAL_STEPS);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  tryAgainBtn.addEventListener('click', function () {
+    stageRejected.classList.add('hidden');
+    stageRejected.setAttribute('aria-hidden', 'true');
+    stageWizard.classList.remove('hidden');
+    stageWizard.setAttribute('aria-hidden', 'false');
+    showStep(1);
+    resetFormState();
+  });
+
+  brandLogoLink.addEventListener('click', function (event) {
+    event.preventDefault();
+    resetFormState();
+    stageDashboard.classList.add('hidden');
+    stageDashboard.setAttribute('aria-hidden', 'true');
+    stageRejected.classList.add('hidden');
+    stageRejected.setAttribute('aria-hidden', 'true');
+    stageWizard.classList.remove('hidden');
+    stageWizard.setAttribute('aria-hidden', 'false');
+    showStep(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  function resetFormState() {
+    financingNeed = null;
+    cachedResult = null;
+    form.reset();
+    document.querySelectorAll('.select-card').forEach(function (btn) {
+      btn.classList.remove('selected');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    document.querySelectorAll('.field-error-inline').forEach(function (el) { el.remove(); });
+    document.querySelectorAll('.input-invalid').forEach(function (inp) { inp.classList.remove('input-invalid'); });
+    financingError.classList.add('hidden');
+    form.tenorYears.value = 3;
+    form.interestRate.value = 16.75;
+  }
+
   // ── Init: wizard visible, dashboard hidden ─────────────────────
+  resetFormState();
   showStep(1);
 })();

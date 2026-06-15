@@ -685,3 +685,57 @@ strong { color: var(--deep-blue); }
 
   .social-links { margin-top: 16px; }
 }
+
+.back-assessment {
+  margin: 0 auto 24px;
+  display: inline-flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.rejection-panel {
+  background: #fff;
+  padding: 32px;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 75, 135, 0.08);
+  max-width: 720px;
+  margin: 40px auto;
+  text-align: left;
+}
+
+.rejection-pill {
+  display: inline-block;
+  padding: 8px 14px;
+  background: rgba(255, 114, 94, 0.1);
+  color: #bf1e2e;
+  font-weight: 700;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+.rejection-copy {
+  margin: 0 0 20px;
+  color: #24405a;
+  font-size: 1rem;
+}
+
+.rejection-details h2,
+.rejection-guidance h2 {
+  margin: 20px 0 12px;
+  color: var(--deep-blue);
+  font-size: 1rem;
+}
+
+.rejection-details ul,
+.rejection-guidance ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #5b6f89;
+}
+
+.rejection-details li,
+.rejection-guidance li {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+

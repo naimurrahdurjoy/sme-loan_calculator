@@ -151,8 +151,7 @@
   <div id="stage-dashboard" class="hidden" aria-hidden="true">
     <main class="container">
       <section class="calculator-section" aria-labelledby="emi-heading">
-        <h1 id="emi-heading" class="section-title">SME LOAN EMI CALCULATOR</h1>
-
+        <h1 id="emi-heading" class="section-title">SME LOAN EMI CALCULATOR</h1>          <button type="button" id="backToAssessmentBtn" class="btn-secondary back-assessment">← Back to Assessment</button>
         <div class="calculator-grid" role="region" aria-label="EMI calculator">
           <div class="calc-panel inputs">
             <label for="loan-amount">Loan Amount (BDT)</label>
@@ -212,6 +211,32 @@
         </div>
 
         <p class="note">This is an indicative amount. Tax, Excise duty will be applicable on the account as per Govt. regulation.</p>
+      </section>
+    </main>
+  </div>
+
+  <div id="stage-rejected" class="hidden" aria-hidden="true">
+    <main class="container">
+      <section class="rejection-panel" aria-labelledby="rejection-heading">
+        <div class="rejection-pill">REJECTED</div>
+        <h1 id="rejection-heading" class="section-title">Estimate Not Eligible</h1>
+        <p class="rejection-copy">Your disposable cash margins or current short-term assets are below baseline bank credit metrics.</p>
+        <div class="rejection-details">
+          <h2>Why this happened</h2>
+          <ul>
+            <li id="reject-reason-netincome">Net income is insufficient after expenses.</li>
+            <li id="reject-reason-assets">Short-term asset coverage does not meet current liability needs.</li>
+          </ul>
+        </div>
+        <div class="rejection-guidance">
+          <h2>How to improve eligibility</h2>
+          <ol>
+            <li>Lower overhead operational expenses.</li>
+            <li>Repay high-cost outstanding EMIs to reclaim headroom.</li>
+            <li>Build verified credit trails by increasing cash-to-bank revenue channels.</li>
+          </ol>
+        </div>
+        <button type="button" id="tryAgainBtn" class="btn-primary">Try Again</button>
       </section>
     </main>
   </div>
